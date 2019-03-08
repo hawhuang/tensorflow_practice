@@ -127,7 +127,8 @@ def generate_for_d(sess,model,filename):
         rating = np.array(rating[0]) / 0.2
         exp_rating = np.exp(rating)
         prob = exp_rating / np.sum(exp_rating)
-
+        
+        #按照生成器预测的概率抽取出来作为负样本
         neg = np.random.choice(np.arange(ITEM_NUM),size=len(pos),p=prob)
         # 1:1 的正负样本
         for i in range(len(pos)):
@@ -172,7 +173,8 @@ def main():
                         else:
                             input_user,input_item,input_label = ut.get_batch_data(DIS_TRAIN_FILE,index,train_size-index+1)
                         index += BATCH_SIZE
-
+                        
+                        #提取样本，训练解码器
                         _ = sess.run(discriminator.d_updates,feed_dict={
                             discriminator.u:input_user,discriminator.i:input_item,discriminator.label:input_label
                         })
@@ -187,8 +189,9 @@ def main():
                         prob = exp_rating / np.sum(exp_rating)
 
                         pn = (1-sample_lambda) * prob
+                        #对正样本加权
                         pn[pos] += sample_lambda * 1.0 / len(pos)
-
+                        #按概率提取样本
                         sample = np.random.choice(np.arange(ITEM_NUM), 2 * len(pos), p=pn)
 
                         reward = sess.run(discriminator.reward, {discriminator.u: u, discriminator.i: sample})
