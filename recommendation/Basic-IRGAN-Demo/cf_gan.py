@@ -212,8 +212,8 @@ def main():
                         best = p_5
 
 
-                gen_log.close()
-                dis_log.close()
+        gen_log.close()
+        dis_log.close()
 
 
 
